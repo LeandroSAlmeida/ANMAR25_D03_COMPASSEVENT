@@ -1,26 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { CreateUser } from '../db/users/create-user';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 
-@Injectable()
-export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+export class UserService {
+  private createUser: CreateUser;
+
+  constructor() {
+    this.createUser = new CreateUser();
   }
 
-  findAll() {
-    return `This action returns all users`;
-  }
+  async createUserService(dto: CreateUserDto) {
+    const createUserDto = plainToInstance(CreateUserDto, dto);
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+    const errors = await validate(createUserDto);
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+    if (errors.length > 0) {
+      throw new Error('Validation failed: ' + JSON.stringify(errors));
+    }
+    const newUser = await this.createUser.execute(createUserDto);
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    return newUser;
   }
 }

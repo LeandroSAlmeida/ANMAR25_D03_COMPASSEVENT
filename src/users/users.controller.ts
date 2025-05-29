@@ -1,42 +1,35 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
-  Delete,
+  Controller,
+  Post,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { validate } from 'class-validator';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { CreateUser } from '../db/users/create-user';
+import { plainToInstance } from 'class-transformer';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  private readonly createUserService = new CreateUser();
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
+  async create(@Body() dto: CreateUserDto) {
+    const dtoInstance = plainToInstance(CreateUserDto, dto);
+    const errors = await validate(dtoInstance);
+    if (errors.length > 0) {
+      throw new HttpException(
+        { message: 'Validation failed', errors },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    try {
+      const user = await this.createUserService.execute(dtoInstance);
+      return user;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 }
