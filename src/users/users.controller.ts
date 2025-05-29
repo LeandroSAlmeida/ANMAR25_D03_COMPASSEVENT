@@ -5,31 +5,23 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { validate } from 'class-validator';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { CreateUser } from '../db/users/create-user';
-import { plainToInstance } from 'class-transformer';
+import { UserService } from '../users/users.service';
 
 @Controller('users')
 export class UsersController {
-  private readonly createUserService = new CreateUser();
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   async create(@Body() dto: CreateUserDto) {
-    const dtoInstance = plainToInstance(CreateUserDto, dto);
-    const errors = await validate(dtoInstance);
-    if (errors.length > 0) {
-      throw new HttpException(
-        { message: 'Validation failed', errors },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     try {
-      const user = await this.createUserService.execute(dtoInstance);
+      const user = await this.userService.createUserService(dto);
       return user;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        error.message || 'Error creating user',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }

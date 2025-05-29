@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
-
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../../users/dto/create-user.dto';
 import { User } from '../../users/entities/user.entity';
 import { UserStatus } from '../../users/enums/userStatus.enum';
@@ -15,6 +15,7 @@ import { UserRole } from '../../users/enums/userRole.enum';
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
+@Injectable()
 export class CreateUser {
   private readonly tableName = 'Users';
 
