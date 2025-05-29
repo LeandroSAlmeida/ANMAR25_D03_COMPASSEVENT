@@ -5,7 +5,7 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 dotenv.config();
 
 export const DynamoDBProvider = {
-  provide: 'DYNAMO_DB_CLIENT',
+  provide: 'DYNAMO_DB_COMPASS_EVENT',
   useFactory: () => {
     const client = new DynamoDBClient({
       region: process.env.AWS_REGION,
