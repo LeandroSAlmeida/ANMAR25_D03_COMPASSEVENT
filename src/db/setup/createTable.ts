@@ -5,30 +5,38 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { ddbClient } from '../libs/ddbClients';
 
-const USERS_TABLE_NAME = 'Users';
-
-const params: CreateTableInput = {
-  TableName: USERS_TABLE_NAME,
-  KeySchema: [
-    {
-      AttributeName: 'id',
-      KeyType: 'HASH',
+const TABLES: { name: string; params: CreateTableInput }[] = [
+  {
+    name: 'Users',
+    params: {
+      TableName: 'Users',
+      KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+      AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }],
+      ProvisionedThroughput: {
+        ReadCapacityUnits: 1,
+        WriteCapacityUnits: 1,
+      },
+      StreamSpecification: {
+        StreamEnabled: false,
+      },
     },
-  ],
-  AttributeDefinitions: [
-    {
-      AttributeName: 'id',
-      AttributeType: 'S',
+  },
+  {
+    name: 'Events',
+    params: {
+      TableName: 'Events',
+      KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+      AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }],
+      ProvisionedThroughput: {
+        ReadCapacityUnits: 1,
+        WriteCapacityUnits: 1,
+      },
+      StreamSpecification: {
+        StreamEnabled: false,
+      },
     },
-  ],
-  ProvisionedThroughput: {
-    ReadCapacityUnits: 1,
-    WriteCapacityUnits: 1,
   },
-  StreamSpecification: {
-    StreamEnabled: false,
-  },
-};
+];
 
 const waitForTableToBeActive = async (tableName: string, timeout = 30000) => {
   const start = Date.now();
@@ -49,27 +57,27 @@ const waitForTableToBeActive = async (tableName: string, timeout = 30000) => {
 };
 
 export const run = async () => {
-  try {
-    await ddbClient.send(
-      new DescribeTableCommand({ TableName: USERS_TABLE_NAME }),
-    );
-    console.log(`Table "${USERS_TABLE_NAME}" already exists.`);
-  } catch (err: any) {
-    if (err.name === 'ResourceNotFoundException') {
-      try {
-        const data = await ddbClient.send(new CreateTableCommand(params));
-        console.log(
-          'Table creation initiated:',
-          data.TableDescription?.TableStatus,
-        );
+  for (const { name, params } of TABLES) {
+    try {
+      await ddbClient.send(new DescribeTableCommand({ TableName: name }));
+      console.log(`Table "${name}" already exists.`);
+    } catch (err: any) {
+      if (err.name === 'ResourceNotFoundException') {
+        try {
+          const data = await ddbClient.send(new CreateTableCommand(params));
+          console.log(
+            `Table "${name}" creation initiated:`,
+            data.TableDescription?.TableStatus,
+          );
 
-        await waitForTableToBeActive(USERS_TABLE_NAME);
-        console.log(`Table "${USERS_TABLE_NAME}" is now ACTIVE.`);
-      } catch (createErr) {
-        console.error('Error creating table', createErr);
+          await waitForTableToBeActive(name);
+          console.log(`Table "${name}" is now ACTIVE.`);
+        } catch (createErr) {
+          console.error(`Error creating table "${name}"`, createErr);
+        }
+      } else {
+        console.error(`Error checking table "${name}"`, err);
       }
-    } else {
-      console.error('Error checking existence of table', err);
     }
   }
 };
