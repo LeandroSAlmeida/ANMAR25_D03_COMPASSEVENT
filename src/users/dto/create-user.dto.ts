@@ -4,11 +4,11 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUrl,
   Matches,
 } from 'class-validator';
 import { UserStatus } from '../enums/userStatus.enum';
 import { UserRole } from '../enums/userRole.enum';
+import { Transform } from 'class-transformer';
 
 export class CreateUserDto {
   @IsString()
@@ -20,9 +20,9 @@ export class CreateUserDto {
   email: string;
 
   @IsNotEmpty()
-  @Matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/, {
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/, {
     message:
-      'Password must be at least 8 characters long and contain at least one letter and one number',
+      'Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number',
   })
   password: string;
 
@@ -33,12 +33,19 @@ export class CreateUserDto {
   phone: string;
 
   @IsOptional()
-  @IsUrl()
   profileImageUrl?: string;
 
-  @IsEnum(UserStatus)
-  isActive?: number;
+  @IsEnum(UserStatus, {
+    message: 'isActive must be either 0 (disabled) or 1 (active)',
+  })
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  isActive?: UserStatus;
 
-  @IsEnum(UserRole)
-  role: UserRole;
+  @IsEnum(UserRole, {
+    message:
+      'role must be one of the following values: organizador, participante',
+  })
+  @IsOptional()
+  role?: UserRole;
 }
