@@ -4,12 +4,15 @@ import { validate } from 'class-validator';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { CreateUser } from '../db/users/create-user';
 import { AwsS3Service } from '../aws/s3.service';
+import { ListUsers } from 'src/db/users/list-users';
+import { UserStatus } from './enums/userStatus.enum';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly awsS3Service: AwsS3Service,
     private readonly createUser: CreateUser,
+    private readonly listUsers: ListUsers,
   ) {}
 
   async createUserService(dto: CreateUserDto) {
@@ -61,5 +64,17 @@ export class UserService {
 
     const newUser = await this.createUser.execute(createUserDto);
     return newUser;
+  }
+
+  async listUsersService(
+    filters: {
+      name?: string;
+      email?: string;
+      role?: string;
+      status?: UserStatus;
+    },
+    pagination: { limit?: number; page?: number },
+  ) {
+    return await this.listUsers.execute(filters, pagination);
   }
 }
