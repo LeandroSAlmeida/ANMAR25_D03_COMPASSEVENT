@@ -36,6 +36,27 @@ const TABLES: { name: string; params: CreateTableInput }[] = [
       },
     },
   },
+  {
+    name: 'Subscriptions',
+    params: {
+      TableName: 'Subscriptions',
+      KeySchema: [
+        { AttributeName: 'userId', KeyType: 'HASH' },
+        { AttributeName: 'eventId', KeyType: 'RANGE' },
+      ],
+      AttributeDefinitions: [
+        { AttributeName: 'userId', AttributeType: 'S' },
+        { AttributeName: 'eventId', AttributeType: 'S' },
+      ],
+      ProvisionedThroughput: {
+        ReadCapacityUnits: 1,
+        WriteCapacityUnits: 1,
+      },
+      StreamSpecification: {
+        StreamEnabled: false,
+      },
+    },
+  },
 ];
 
 const waitForTableToBeActive = async (tableName: string, timeout = 30000) => {
