@@ -9,6 +9,7 @@ export class User {
   phone: string;
   profileImageUrl: string;
   createdAt: string;
+  updatedAt?: string;
   isActive: UserStatus;
   role: UserRole;
 

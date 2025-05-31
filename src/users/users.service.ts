@@ -6,6 +6,8 @@ import { CreateUser } from '../db/users/create-user';
 import { AwsS3Service } from '../aws/s3.service';
 import { ListUsers } from 'src/db/users/list-users';
 import { UserStatus } from './enums/userStatus.enum';
+import { UpdateUser } from 'src/db/users/update-user';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -13,6 +15,7 @@ export class UserService {
     private readonly awsS3Service: AwsS3Service,
     private readonly createUser: CreateUser,
     private readonly listUsers: ListUsers,
+    private readonly updateUser: UpdateUser,
   ) {}
 
   async createUserService(dto: CreateUserDto) {
@@ -76,5 +79,20 @@ export class UserService {
     pagination: { limit?: number; page?: number },
   ) {
     return await this.listUsers.execute(filters, pagination);
+  }
+
+  async updateUserService(userId: string, dto: UpdateUserDto) {
+    const updateUserDto = plainToInstance(UpdateUserDto, dto);
+    const errors = await validate(updateUserDto, {
+      skipMissingProperties: true,
+    });
+
+    if (errors.length > 0) {
+      throw new Error('Validation failed: ' + JSON.stringify(errors));
+    }
+
+    const updatedUser = await this.updateUser.execute(userId, dto);
+    const { password, ...userWithoutPassword } = updatedUser ?? {};
+    return userWithoutPassword;
   }
 }
