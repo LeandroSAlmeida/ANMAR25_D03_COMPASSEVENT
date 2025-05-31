@@ -8,6 +8,7 @@ import { ListUsers } from 'src/db/users/list-users';
 import { UserStatus } from './enums/userStatus.enum';
 import { UpdateUser } from 'src/db/users/update-user';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FindUserById } from 'src/db/users/findById-user';
 
 @Injectable()
 export class UserService {
@@ -16,6 +17,7 @@ export class UserService {
     private readonly createUser: CreateUser,
     private readonly listUsers: ListUsers,
     private readonly updateUser: UpdateUser,
+    private readonly findUserById: FindUserById,
   ) {}
 
   async createUserService(dto: CreateUserDto) {
@@ -94,5 +96,9 @@ export class UserService {
     const updatedUser = await this.updateUser.execute(userId, dto);
     const { password, ...userWithoutPassword } = updatedUser ?? {};
     return userWithoutPassword;
+  }
+
+  async findById(id: string) {
+    return await this.findUserById.execute(id);
   }
 }
