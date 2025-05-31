@@ -9,6 +9,7 @@ import { UserStatus } from './enums/userStatus.enum';
 import { UpdateUser } from 'src/db/users/update-user';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUserById } from 'src/db/users/findById-user';
+import { DeleteUser } from 'src/db/users/delete-user';
 
 @Injectable()
 export class UserService {
@@ -18,6 +19,7 @@ export class UserService {
     private readonly listUsers: ListUsers,
     private readonly updateUser: UpdateUser,
     private readonly findUserById: FindUserById,
+    private readonly deleteUser: DeleteUser,
   ) {}
 
   async createUserService(dto: CreateUserDto) {
@@ -100,5 +102,9 @@ export class UserService {
 
   async findById(id: string) {
     return await this.findUserById.execute(id);
+  }
+
+  async delete(id: string) {
+    return await this.deleteUser.execute(id);
   }
 }

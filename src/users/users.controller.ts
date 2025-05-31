@@ -9,6 +9,7 @@ import {
   Get,
   Patch,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserService } from '../users/users.service';
@@ -82,5 +83,10 @@ export class UsersController {
   @Get(':id')
   async findById(@Param('id') id: string) {
     return await this.userService.findById(id);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    return await this.userService.delete(id);
   }
 }
