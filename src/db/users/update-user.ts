@@ -10,7 +10,7 @@ export class UpdateUser {
   private readonly tableName = 'Users';
 
   async execute(userId: string, updateFields: Record<string, any>) {
-    const allowedFields = ['name', 'email', 'password', 'phone', 'isActive'];
+    const allowedFields = ['name', 'email', 'password', 'phone'];
     const updateExpressions: string[] = [];
     const expressionAttributeNames: Record<string, string> = {};
     const expressionAttributeValues: Record<string, any> = {};
