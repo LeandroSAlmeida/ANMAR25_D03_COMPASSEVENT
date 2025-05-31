@@ -39,7 +39,12 @@ export class CreateUserDto {
     message: 'isActive must be either 0 (disabled) or 1 (active)',
   })
   @IsOptional()
-  @Transform(({ value }) => Number(value))
+  @Transform(({ value }) => {
+    if (value === null || value === undefined || value === '') {
+      return undefined;
+    }
+    return Number(value);
+  })
   isActive?: UserStatus;
 
   @IsEnum(UserRole, {
