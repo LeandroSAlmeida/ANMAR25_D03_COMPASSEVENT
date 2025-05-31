@@ -7,9 +7,12 @@ import {
   HttpStatus,
   Query,
   Get,
+  Patch,
+  Param,
 } from '@nestjs/common';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserService } from '../users/users.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -58,6 +61,19 @@ export class UsersController {
     } catch (error) {
       throw new HttpException(
         error.message || 'Error listing users',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    try {
+      const user = await this.userService.updateUserService(id, dto);
+      return user;
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Error updating user',
         HttpStatus.BAD_REQUEST,
       );
     }
