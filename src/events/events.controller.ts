@@ -4,9 +4,13 @@ import {
   Body,
   HttpException,
   HttpStatus,
+  Patch,
+  Param,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { EventService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Controller('events')
 export class EventController {
@@ -22,5 +26,10 @@ export class EventController {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  @Patch(':id')
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateEventDto) {
+    return this.eventService.update(id, dto);
   }
 }
