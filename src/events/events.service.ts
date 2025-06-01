@@ -5,6 +5,8 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { CreateEvent } from 'src/db/events/create-event';
 import { AwsS3Service } from 'src/aws/s3.service';
 import { FindUserById } from 'src/db/users/findById-user';
+import { UpdateEvent } from 'src/db/events/update-event';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Injectable()
 export class EventService {
@@ -12,6 +14,7 @@ export class EventService {
     private readonly awsS3Service: AwsS3Service,
     private readonly createEvent: CreateEvent,
     private readonly findUserById: FindUserById,
+    private readonly updateEvent: UpdateEvent,
   ) {}
 
   async createEventService(dto: CreateEventDto) {
@@ -56,5 +59,9 @@ export class EventService {
 
     const newEvent = await this.createEvent.execute(createEventDto);
     return newEvent;
+  }
+
+  async update(eventId: string, dto: UpdateEventDto) {
+    return this.updateEvent.execute(eventId, dto);
   }
 }
