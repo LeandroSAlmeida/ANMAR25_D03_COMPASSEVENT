@@ -1,26 +1,60 @@
 import { Injectable } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { CreateEventDto } from './dto/create-event.dto';
-import { UpdateEventDto } from './dto/update-event.dto';
+import { CreateEvent } from 'src/db/events/create-event';
+import { AwsS3Service } from 'src/aws/s3.service';
+import { FindUserById } from 'src/db/users/findById-user';
 
 @Injectable()
-export class EventsService {
-  create(createEventDto: CreateEventDto) {
-    return 'This action adds a new event';
-  }
+export class EventService {
+  constructor(
+    private readonly awsS3Service: AwsS3Service,
+    private readonly createEvent: CreateEvent,
+    private readonly findUserById: FindUserById,
+  ) {}
 
-  findAll() {
-    return `This action returns all events`;
-  }
+  async createEventService(dto: CreateEventDto) {
+    const createEventDto = plainToInstance(CreateEventDto, dto);
 
-  findOne(id: number) {
-    return `This action returns a #${id} event`;
-  }
+    const errors = await validate(createEventDto);
+    if (errors.length > 0) {
+      throw new Error('Validation failed: ' + JSON.stringify(errors));
+    }
 
-  update(id: number, updateEventDto: UpdateEventDto) {
-    return `This action updates a #${id} event`;
-  }
+    const organizer = await this.findUserById.execute(dto.organizerId);
+    if (!organizer) {
+      throw new Error('Organizer not found.');
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} event`;
+    if (dto.imageUrl) {
+      let buffer: Buffer;
+      let mimeType: string;
+      let fileExtension: string;
+
+      const match = dto.imageUrl.match(/^data:(.+);base64,(.+)$/);
+      if (match) {
+        mimeType = match[1];
+        const base64Data = match[2];
+        buffer = Buffer.from(base64Data, 'base64');
+        fileExtension = mimeType.split('/')[1];
+      } else {
+        buffer = Buffer.from(dto.imageUrl, 'base64');
+        mimeType = 'application/octet-stream';
+        fileExtension = 'bin';
+      }
+
+      const fileName = `event-${Date.now()}.${fileExtension}`;
+      const uploadedUrl = await this.awsS3Service.uploadFile(
+        buffer,
+        fileName,
+        mimeType,
+      );
+
+      createEventDto.imageUrl = uploadedUrl;
+    }
+
+    const newEvent = await this.createEvent.execute(createEventDto);
+    return newEvent;
   }
 }

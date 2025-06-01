@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
+import { CreateEvent } from './create-event';
+import { UserMethodsModule } from '../users/user.methods.module';
 
 @Module({
-  providers: [],
-  exports: [],
+  imports: [UserMethodsModule],
+  providers: [CreateEvent],
+  exports: [CreateEvent],
 })
 export class EventMethodsModule {}
