@@ -7,6 +7,7 @@ import {
   Patch,
   Param,
   ParseUUIDPipe,
+  Get,
 } from '@nestjs/common';
 import { EventService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -31,5 +32,17 @@ export class EventController {
   @Patch(':id')
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateEventDto) {
     return this.eventService.update(id, dto);
+  }
+
+  @Get(':id')
+  async findById(@Param('id', ParseUUIDPipe) id: string) {
+    try {
+      return await this.eventService.findById(id);
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Error to search event',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
