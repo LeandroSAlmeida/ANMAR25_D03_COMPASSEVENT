@@ -9,6 +9,8 @@ import {
   ParseUUIDPipe,
   Get,
   Query,
+  Delete,
+  HttpCode,
 } from '@nestjs/common';
 import { EventService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -57,5 +59,11 @@ export class EventController {
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteEvent(@Param('id') id: string) {
+    await this.eventService.softDeleteEvent(id);
   }
 }
