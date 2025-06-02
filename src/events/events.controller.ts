@@ -8,6 +8,7 @@ import {
   Param,
   ParseUUIDPipe,
   Get,
+  Query,
 } from '@nestjs/common';
 import { EventService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -41,6 +42,18 @@ export class EventController {
     } catch (error) {
       throw new HttpException(
         error.message || 'Error to search event',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get()
+  async getAll(@Query() query: any) {
+    try {
+      return await this.eventService.getAll(query);
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erro ao listar eventos',
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

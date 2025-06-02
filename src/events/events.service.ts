@@ -8,6 +8,7 @@ import { FindUserById } from 'src/db/users/findById-user';
 import { UpdateEvent } from 'src/db/events/update-event';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { FindEventById } from 'src/db/events/findById-event';
+import { FindAllEvents } from 'src/db/events/findAll-event';
 
 @Injectable()
 export class EventService {
@@ -17,6 +18,7 @@ export class EventService {
     private readonly findUserById: FindUserById,
     private readonly updateEvent: UpdateEvent,
     private readonly findEventById: FindEventById,
+    private readonly findAllEvents: FindAllEvents,
   ) {}
 
   async createEventService(dto: CreateEventDto) {
@@ -69,5 +71,16 @@ export class EventService {
 
   async findById(eventId: string) {
     return this.findEventById.execute(eventId);
+  }
+
+  async getAll(query: {
+    name?: string;
+    date?: string;
+    dateDirection?: 'before' | 'after';
+    status?: string;
+    limit?: number;
+    lastKey?: string;
+  }) {
+    return this.findAllEvents.execute(query);
   }
 }
