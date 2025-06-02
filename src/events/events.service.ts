@@ -7,6 +7,7 @@ import { AwsS3Service } from 'src/aws/s3.service';
 import { FindUserById } from 'src/db/users/findById-user';
 import { UpdateEvent } from 'src/db/events/update-event';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { FindEventById } from 'src/db/events/findById-event';
 
 @Injectable()
 export class EventService {
@@ -15,6 +16,7 @@ export class EventService {
     private readonly createEvent: CreateEvent,
     private readonly findUserById: FindUserById,
     private readonly updateEvent: UpdateEvent,
+    private readonly findEventById: FindEventById,
   ) {}
 
   async createEventService(dto: CreateEventDto) {
@@ -63,5 +65,9 @@ export class EventService {
 
   async update(eventId: string, dto: UpdateEventDto) {
     return this.updateEvent.execute(eventId, dto);
+  }
+
+  async findById(eventId: string) {
+    return this.findEventById.execute(eventId);
   }
 }
