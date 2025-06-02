@@ -1,14 +1,10 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import {
-  DynamoDBClient,
-  ScanCommand,
-  AttributeValue,
-} from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
   DynamoDBDocumentClient,
+  ScanCommand,
   ScanCommandInput,
 } from '@aws-sdk/lib-dynamodb';
-import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { Event } from '../../events/entities/event.entity';
 
 @Injectable()
@@ -43,26 +39,39 @@ export class FindAllEvents {
         Limit: limit,
       };
 
+      const filterExpressions: string[] = [];
+      const expressionAttributeNames: Record<string, string> = {};
+      const expressionAttributeValues: Record<string, any> = {};
+
+      if (status) {
+        filterExpressions.push('#status = :status');
+        expressionAttributeNames['#status'] = 'status';
+        expressionAttributeValues[':status'] = status.toLowerCase();
+      }
+
+      if (filterExpressions.length > 0) {
+        params.FilterExpression = filterExpressions.join(' AND ');
+        params.ExpressionAttributeNames = expressionAttributeNames;
+        params.ExpressionAttributeValues = expressionAttributeValues;
+      }
+
       if (lastKey) {
-        params.ExclusiveStartKey = { id: { S: lastKey } };
+        params.ExclusiveStartKey = { id: lastKey };
       }
 
       const result = await this.docClient.send(new ScanCommand(params));
 
-      const items: Event[] = (result.Items || []).map(
-        (item) => unmarshall(item as Record<string, AttributeValue>) as Event,
-      );
-      let filteredItems = items;
+      let items: Event[] = (result.Items as Event[]) || [];
 
       if (name) {
-        filteredItems = filteredItems.filter((e) =>
-          e.name.toLowerCase().includes(name.toLowerCase()),
+        items = items.filter((e) =>
+          e.name?.toLowerCase().includes(name.toLowerCase()),
         );
       }
 
       if (date && dateDirection) {
         const targetDate = new Date(date).toISOString();
-        filteredItems = filteredItems.filter((e) => {
+        items = items.filter((e) => {
           const eventDate = new Date(e.date).toISOString();
           return dateDirection === 'before'
             ? eventDate < targetDate
@@ -70,22 +79,19 @@ export class FindAllEvents {
         });
       }
 
-      if (status) {
-        filteredItems = filteredItems.filter(
-          (e) => e.status?.toLowerCase() === status.toLowerCase(),
-        );
-      }
-
-      const lastEvaluatedKey = result.LastEvaluatedKey?.id?.S ?? undefined;
+      const lastEvaluatedKey = result.LastEvaluatedKey?.id as
+        | string
+        | undefined;
 
       return {
         items,
         limit,
         currentPage: lastKey ? undefined : 1,
         hasMore: !!result.LastEvaluatedKey,
-        lastKey: result.LastEvaluatedKey?.id as unknown as string,
+        lastKey: lastEvaluatedKey,
       };
     } catch (error) {
+      console.error(error);
       throw new InternalServerErrorException(
         'Error fetching paginated events.',
       );
