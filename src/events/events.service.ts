@@ -9,6 +9,7 @@ import { UpdateEvent } from 'src/db/events/update-event';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { FindEventById } from 'src/db/events/findById-event';
 import { FindAllEvents } from 'src/db/events/findAll-event';
+import { DeleteEvent } from 'src/db/events/delete-event';
 
 @Injectable()
 export class EventService {
@@ -19,6 +20,7 @@ export class EventService {
     private readonly updateEvent: UpdateEvent,
     private readonly findEventById: FindEventById,
     private readonly findAllEvents: FindAllEvents,
+    private readonly deleteEvent: DeleteEvent,
   ) {}
 
   async createEventService(dto: CreateEventDto) {
@@ -82,5 +84,9 @@ export class EventService {
     lastKey?: string;
   }) {
     return this.findAllEvents.execute(query);
+  }
+
+  async softDeleteEvent(eventId: string) {
+    return await this.deleteEvent.execute(eventId);
   }
 }
