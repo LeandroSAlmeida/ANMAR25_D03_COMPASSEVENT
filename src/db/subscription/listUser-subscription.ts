@@ -6,6 +6,7 @@ import {
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Subscription } from '../../subscription/entities/subscription.entity';
 import { FindEventById } from '../events/findById-event';
+import { SubscriptionStatus } from 'src/subscription/enums/SubscriptionStatus.enum';
 
 const client = new DynamoDBClient({});
 
@@ -66,6 +67,8 @@ export class ListSubscriptionsByUser {
         userId: item.userId.S || '',
         eventId: item.eventId.S || '',
         createdAt: item.createdAt.S || '',
+        status:
+          (item.status?.S as SubscriptionStatus) || SubscriptionStatus.ACTIVE,
       }));
 
       const subscriptionsWithName = await Promise.all(
