@@ -14,6 +14,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateSubscriptionDto } from '../../subscription/dto/create-subscription.dto';
 import { Subscription } from '../../subscription/entities/subscription.entity';
+import { SubscriptionStatus } from 'src/subscription/enums/SubscriptionStatus.enum';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -72,6 +73,7 @@ export class CreateSubscription {
         userId,
         eventId,
         createdAt: now,
+        status: SubscriptionStatus.ACTIVE,
       };
 
       await docClient.send(
