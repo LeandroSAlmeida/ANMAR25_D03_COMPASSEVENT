@@ -1,4 +1,14 @@
-import { Controller, Post, Body, Get, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+  Delete,
+} from '@nestjs/common';
 import { SubscriptionService } from './subscription.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { Subscription } from './entities/subscription.entity';
@@ -35,5 +45,10 @@ export class SubscriptionController {
       nextPageToken: result.nextPageToken,
       hasMore: result.hasMore,
     };
+  }
+
+  @Delete(':userId/:eventId')
+  delete(@Param('userId') userId: string, @Param('eventId') eventId: string) {
+    return this.subscriptionService.softDeleteSubscription(userId, eventId);
   }
 }
