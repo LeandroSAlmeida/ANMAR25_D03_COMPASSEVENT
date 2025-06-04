@@ -19,7 +19,7 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { RolesGuard } from 'src/auth/role.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { UserRole } from 'src/users/enums/userRole.enum';
-import { Roles } from 'src/auth/roles.decorator';
+import { Roles } from '../auth/decoretors/roles.decorator';
 
 @Controller('events')
 @UseGuards(AuthGuard('jwt'), RolesGuard)

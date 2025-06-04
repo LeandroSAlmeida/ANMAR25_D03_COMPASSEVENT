@@ -10,15 +10,23 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserService } from '../users/users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Public } from 'src/auth/decoretors/public.decorator';
 
 @Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly userService: UserService) {}
 
+  @Public()
   @Post()
   async create(@Body() dto: CreateUserDto) {
     try {
@@ -68,14 +76,24 @@ export class UsersController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+    @Req() req: Request & { user: JwtPayload },
+  ) {
     try {
+      if (req.user?.sub !== id) {
+        console.log('ID do token:', req.user?.sub);
+        console.log('ID da rota:', id);
+        throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
+      }
+
       const user = await this.userService.updateUserService(id, dto);
       return user;
     } catch (error) {
       throw new HttpException(
         error.message || 'Error updating user',
-        HttpStatus.BAD_REQUEST,
+        error.status || HttpStatus.BAD_REQUEST,
       );
     }
   }

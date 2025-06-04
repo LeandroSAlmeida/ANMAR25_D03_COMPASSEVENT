@@ -1,10 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import {
-  DynamoDBDocumentClient,
-  ScanCommand,
-  ScanCommandInput,
-} from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { User } from 'src/users/entities/user.entity';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -13,27 +10,29 @@ const docClient = DynamoDBDocumentClient.from(client);
 export class FindUserByEmail {
   private readonly tableName = 'Users';
 
-  async execute(email: string) {
-    const params: ScanCommandInput = {
-      TableName: this.tableName,
-      FilterExpression: '#email = :email',
-      ExpressionAttributeNames: {
-        '#email': 'email',
-      },
-      ExpressionAttributeValues: {
-        ':email': email.trim(),
-      },
-      Limit: 1,
-    };
+  async execute(email: string): Promise<User> {
+    let ExclusiveStartKey;
+    let user: User | undefined;
 
-    const result = await docClient.send(
-      new ScanCommand({ TableName: this.tableName }),
-    );
+    do {
+      const result = await docClient.send(
+        new ScanCommand({
+          TableName: this.tableName,
+          ExclusiveStartKey,
+        }),
+      );
 
-    if (!result.Items || result.Items.length === 0) {
+      user = result.Items?.find((item) => item.email === email.trim()) as User;
+
+      if (user) break;
+
+      ExclusiveStartKey = result.LastEvaluatedKey;
+    } while (ExclusiveStartKey);
+
+    if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    return result.Items[0];
+    return user;
   }
 }
