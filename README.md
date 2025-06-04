@@ -54,9 +54,10 @@ After creating your bucket, make sure to add the following **Bucket Policy** to 
 }
 ```
 
-📚 API Documentation
+## 📚 API Documentation SWAGGER
 After starting the project, open your browser and navigate to:
 `http://localhost:3000/api`
+
 This will open the Swagger UI where you can test all endpoints and see available routes.
 
 🔐 Endpoints are protected — make sure to click "Authorize" in Swagger and provide a valid Bearer token.
