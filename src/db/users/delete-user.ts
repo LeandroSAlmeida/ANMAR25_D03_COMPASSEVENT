@@ -9,6 +9,7 @@ import {
   UpdateCommand,
   GetCommand,
 } from '@aws-sdk/lib-dynamodb';
+import { MailService } from 'src/mail/mail.service';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -16,6 +17,8 @@ const docClient = DynamoDBDocumentClient.from(client);
 @Injectable()
 export class DeleteUser {
   private readonly tableName = 'Users';
+
+  constructor(private readonly mailService: MailService) {}
 
   async execute(userId: string) {
     const getUser = await docClient.send(
@@ -58,6 +61,12 @@ export class DeleteUser {
     if (updatedUser && updatedUser.password) {
       delete updatedUser.password;
     }
+
+    await this.mailService.sendMail(
+      user.email,
+      'Your account has been deleted',
+      `<p>${user.name}, your account has been deleted successfully.</p>`,
+    );
 
     return updatedUser;
   }

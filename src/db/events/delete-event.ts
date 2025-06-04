@@ -10,6 +10,8 @@ import {
   GetCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { EventStatus } from '../../events/enums/EventStatus.enum';
+import { MailService } from 'src/mail/mail.service';
+import { FindUserById } from '../users/findById-user';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -17,6 +19,10 @@ const docClient = DynamoDBDocumentClient.from(client);
 @Injectable()
 export class DeleteEvent {
   private readonly tableName = 'Events';
+  constructor(
+    private readonly mailService: MailService,
+    private readonly findUserById: FindUserById,
+  ) {}
 
   async execute(eventId: string) {
     const getEvent = await docClient.send(
@@ -56,6 +62,13 @@ export class DeleteEvent {
     const result = await docClient.send(command);
     const updatedEvent = result.Attributes;
 
+    const organizer = await this.findUserById.execute(event.organizerId);
+
+    await this.mailService.sendMail(
+      organizer.email,
+      'Event deleted',
+      `<p> Your event "${event.name}" was deleted</p>`,
+    );
     return updatedEvent;
   }
 }

@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateEventDto } from 'src/events/dto/create-event.dto';
 import { Event } from 'src/events/entities/event.entity';
 import { FindUserById } from '../users/findById-user';
+import { MailService } from 'src/mail/mail.service';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -13,7 +14,10 @@ const docClient = DynamoDBDocumentClient.from(client);
 export class CreateEvent {
   private readonly tableName = 'Events';
 
-  constructor(private readonly findUserById: FindUserById) {}
+  constructor(
+    private readonly findUserById: FindUserById,
+    private readonly mailService: MailService,
+  ) {}
 
   async execute(dto: CreateEventDto): Promise<Event> {
     const organizer = await this.findUserById.execute(dto.organizerId);
@@ -43,6 +47,11 @@ export class CreateEvent {
       }),
     );
 
+    await this.mailService.sendMail(
+      organizer.email,
+      'Event created successfully',
+      `<p> Your event "${event.name}" was created successfully</p>`,
+    );
     return event;
   }
 }

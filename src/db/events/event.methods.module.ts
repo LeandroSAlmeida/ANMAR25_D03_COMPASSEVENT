@@ -5,6 +5,7 @@ import { UpdateEvent } from './update-event';
 import { FindEventById } from './findById-event';
 import { FindAllEvents } from './findAll-event';
 import { DeleteEvent } from './delete-event';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [UserMethodsModule],
@@ -14,6 +15,7 @@ import { DeleteEvent } from './delete-event';
     FindEventById,
     FindAllEvents,
     DeleteEvent,
+    MailModule,
   ],
   exports: [
     CreateEvent,

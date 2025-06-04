@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateSubscriptionDto } from '../../subscription/dto/create-subscription.dto';
 import { Subscription } from '../../subscription/entities/subscription.entity';
 import { SubscriptionStatus } from 'src/subscription/enums/SubscriptionStatus.enum';
+import { MailService } from '../../mail/mail.service';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -23,6 +24,8 @@ const docClient = DynamoDBDocumentClient.from(client);
 export class CreateSubscription {
   private readonly eventsTable = 'Events';
   private readonly subscriptionsTable = 'Subscriptions';
+
+  constructor(private readonly mailService: MailService) {}
 
   async execute(dto: CreateSubscriptionDto): Promise<Subscription> {
     const { userId, eventId } = dto;
@@ -81,6 +84,14 @@ export class CreateSubscription {
           TableName: this.subscriptionsTable,
           Item: subscription,
         }),
+      );
+
+      const userEmail = 'user@example.com';
+
+      await this.mailService.sendMail(
+        userEmail,
+        'Subscription Confirmed',
+        `<p>You have successfully subscribed to the event: <strong>${event.name}</strong> on ${event.date}.</p>`,
       );
 
       return subscription;

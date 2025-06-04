@@ -1,11 +1,13 @@
 import 'dotenv/config';
 import { CreateUser } from '../db/users/create-user';
+import { MailService } from '../mail/mail.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UserRole } from '../users/enums/userRole.enum';
 import { UserStatus } from '../users/enums/userStatus.enum';
 
 async function runSeed() {
-  const createUserService = new CreateUser();
+  const mailService = new MailService();
+  const createUserService = new CreateUser(mailService);
 
   const userDto: CreateUserDto = {
     name: process.env.DEFAULT_USER_NAME || 'Organizador Seed',
