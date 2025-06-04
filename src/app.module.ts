@@ -7,6 +7,7 @@ import { UploadController } from './aws/s3.controller';
 import { AwsS3Service } from './aws/s3.service';
 import { EventsModule } from './events/events.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
     UsersModule,
     EventsModule,
     SubscriptionModule,
+    AuthModule,
   ],
   controllers: [AppController, UploadController],
   providers: [AppService, AwsS3Service],

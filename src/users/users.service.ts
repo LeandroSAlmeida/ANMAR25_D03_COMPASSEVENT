@@ -10,6 +10,7 @@ import { UpdateUser } from 'src/db/users/update-user';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUserById } from 'src/db/users/findById-user';
 import { DeleteUser } from 'src/db/users/delete-user';
+import { FindUserByEmail } from 'src/db/users/findByEmail-user';
 
 @Injectable()
 export class UserService {
@@ -20,6 +21,7 @@ export class UserService {
     private readonly updateUser: UpdateUser,
     private readonly findUserById: FindUserById,
     private readonly deleteUser: DeleteUser,
+    private readonly findUseryEmail: FindUserByEmail,
   ) {}
 
   async createUserService(dto: CreateUserDto) {
@@ -106,5 +108,9 @@ export class UserService {
 
   async delete(id: string) {
     return await this.deleteUser.execute(id);
+  }
+
+  async findByEmail(email: string) {
+    return await this.findUseryEmail.execute(email);
   }
 }

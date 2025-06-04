@@ -11,5 +11,6 @@ import { AwsS3Service } from 'src/aws/s3.service';
   imports: [DbModule, S3Module, UserMethodsModule],
   controllers: [UsersController],
   providers: [UserService, CreateUser, AwsS3Service],
+  exports: [UserService],
 })
 export class UsersModule {}
