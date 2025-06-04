@@ -44,7 +44,7 @@ export class CreateUser {
     const user = new User({
       id,
       name: dto.name,
-      email: dto.email,
+      email: dto.email.trim(),
       password: hashedPassword,
       phone: dto.phone,
       profileImageUrl: dto.profileImageUrl || '',
