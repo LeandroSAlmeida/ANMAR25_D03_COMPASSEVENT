@@ -5,8 +5,10 @@ import { UpdateUser } from './update-user';
 import { FindUserById } from './findById-user';
 import { DeleteUser } from './delete-user';
 import { FindUserByEmail } from './findByEmail-user';
+import { MailModule } from '../../mail/mail.module';
 
 @Module({
+  imports: [MailModule],
   providers: [
     CreateUser,
     ListUsers,
@@ -14,6 +16,7 @@ import { FindUserByEmail } from './findByEmail-user';
     FindUserById,
     DeleteUser,
     FindUserByEmail,
+    MailModule,
   ],
   exports: [
     CreateUser,
@@ -22,6 +25,7 @@ import { FindUserByEmail } from './findByEmail-user';
     FindUserById,
     DeleteUser,
     FindUserByEmail,
+    MailModule,
   ],
 })
 export class UserMethodsModule {}

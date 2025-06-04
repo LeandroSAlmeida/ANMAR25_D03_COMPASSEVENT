@@ -10,6 +10,7 @@ import {
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { SubscriptionStatus } from '../../subscription/enums/SubscriptionStatus.enum';
+import { MailService } from 'src/mail/mail.service';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -17,6 +18,8 @@ const docClient = DynamoDBDocumentClient.from(client);
 @Injectable()
 export class DeleteSubscription {
   private readonly tableName = 'Subscriptions';
+
+  constructor(private readonly mailService: MailService) {}
 
   async execute(userId: string, eventId: string) {
     const result = await docClient.send(
@@ -52,6 +55,14 @@ export class DeleteSubscription {
         },
         ReturnValues: 'ALL_NEW',
       }),
+    );
+
+    const userEmail = 'user@example.com';
+
+    await this.mailService.sendMail(
+      userEmail,
+      'Subscription Deleted',
+      `<p>Your subscription to the event with ID ${subscription.eventId} has been deleted successfully.</p>`,
     );
 
     return updateResult.Attributes;
