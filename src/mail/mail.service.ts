@@ -7,10 +7,16 @@ import { config } from 'dotenv';
 
 config();
 
-const { AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, MAIL_FROM } =
-  process.env;
+const {
+  AWS_REGION,
+  AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY,
+  AWS_SESSION_TOKEN,
+  MAIL_FROM,
+} = process.env;
 
-const shouldSendMail = AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY && MAIL_FROM;
+const shouldSendMail =
+  AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY && AWS_SESSION_TOKEN && MAIL_FROM;
 
 export class MailService {
   private ses: SESClient | null = null;
@@ -22,6 +28,7 @@ export class MailService {
         credentials: {
           accessKeyId: AWS_ACCESS_KEY_ID!,
           secretAccessKey: AWS_SECRET_ACCESS_KEY!,
+          sessionToken: AWS_SESSION_TOKEN!,
         },
       });
     } else {

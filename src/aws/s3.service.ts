@@ -13,6 +13,7 @@ export class AwsS3Service {
     const secretAccessKey = this.configService.get<string>(
       'AWS_SECRET_ACCESS_KEY',
     );
+    const sessionToken = this.configService.get<string>('AWS_SESSION_TOKEN');
     const bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME');
 
     if (!region || !accessKeyId || !secretAccessKey || !bucketName) {
@@ -26,6 +27,7 @@ export class AwsS3Service {
       credentials: {
         accessKeyId,
         secretAccessKey,
+        sessionToken,
       },
     });
   }
