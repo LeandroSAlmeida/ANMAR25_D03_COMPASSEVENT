@@ -11,12 +11,18 @@ import {
   Query,
   Delete,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common';
 import { EventService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { RolesGuard } from 'src/auth/role.guard';
+import { AuthGuard } from '@nestjs/passport';
+import { UserRole } from 'src/users/enums/userRole.enum';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('events')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
@@ -48,7 +54,7 @@ export class EventController {
       );
     }
   }
-
+  @Roles(UserRole.ORGANIZADOR)
   @Get()
   async getAll(@Query() query: any) {
     try {
