@@ -20,6 +20,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Public } from 'src/auth/decoretors/public.decorator';
+import { Roles } from 'src/auth/decoretors/roles.decorator';
+import { UserRole } from './enums/userRole.enum';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
@@ -40,6 +42,7 @@ export class UsersController {
     }
   }
 
+  @Roles(UserRole.ORGANIZADOR)
   @Get()
   async list(
     @Query('name') name?: string,
@@ -99,12 +102,32 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string) {
-    return await this.userService.findById(id);
+  async findById(
+    @Param('id') id: string,
+    @Req() req: Request & { user: JwtPayload },
+  ) {
+    if (req.user.sub === id || req.user.role === UserRole.ORGANIZADOR) {
+      return await this.userService.findById(id);
+    }
+
+    throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string) {
-    return await this.userService.delete(id);
+  async delete(
+    @Param('id') id: string,
+    @Req() req: Request & { user: JwtPayload },
+  ) {
+    try {
+      if (req.user.sub === id || req.user.role === UserRole.ORGANIZADOR) {
+        return await this.userService.delete(id);
+      }
+      throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Error deleting user',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }

@@ -1,5 +1,4 @@
-import { IsEnum, IsNotEmpty, IsUUID } from 'class-validator';
-import { SubscriptionStatus } from '../enums/SubscriptionStatus.enum';
+import { IsNotEmpty, IsUUID } from 'class-validator';
 
 export class CreateSubscriptionDto {
   @IsUUID()
@@ -9,7 +8,4 @@ export class CreateSubscriptionDto {
   @IsUUID()
   @IsNotEmpty()
   eventId: string;
-
-  @IsEnum(SubscriptionStatus)
-  status: SubscriptionStatus;
 }
