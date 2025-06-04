@@ -7,6 +7,9 @@ import { AwsS3Service } from 'src/aws/s3.service';
 import { FindUserById } from 'src/db/users/findById-user';
 import { UpdateEvent } from 'src/db/events/update-event';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { FindEventById } from 'src/db/events/findById-event';
+import { FindAllEvents } from 'src/db/events/findAll-event';
+import { DeleteEvent } from 'src/db/events/delete-event';
 
 @Injectable()
 export class EventService {
@@ -15,6 +18,9 @@ export class EventService {
     private readonly createEvent: CreateEvent,
     private readonly findUserById: FindUserById,
     private readonly updateEvent: UpdateEvent,
+    private readonly findEventById: FindEventById,
+    private readonly findAllEvents: FindAllEvents,
+    private readonly deleteEvent: DeleteEvent,
   ) {}
 
   async createEventService(dto: CreateEventDto) {
@@ -63,5 +69,24 @@ export class EventService {
 
   async update(eventId: string, dto: UpdateEventDto) {
     return this.updateEvent.execute(eventId, dto);
+  }
+
+  async findById(eventId: string) {
+    return this.findEventById.execute(eventId);
+  }
+
+  async getAll(query: {
+    name?: string;
+    date?: string;
+    dateDirection?: 'before' | 'after';
+    status?: string;
+    limit?: number;
+    lastKey?: string;
+  }) {
+    return this.findAllEvents.execute(query);
+  }
+
+  async softDeleteEvent(eventId: string) {
+    return await this.deleteEvent.execute(eventId);
   }
 }

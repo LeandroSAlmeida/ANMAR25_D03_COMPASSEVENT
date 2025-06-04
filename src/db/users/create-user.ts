@@ -11,6 +11,7 @@ import { CreateUserDto } from '../../users/dto/create-user.dto';
 import { User } from '../../users/entities/user.entity';
 import { UserStatus } from '../../users/enums/userStatus.enum';
 import { UserRole } from '../../users/enums/userRole.enum';
+import { MailService } from '../../mail/mail.service';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -18,6 +19,8 @@ const docClient = DynamoDBDocumentClient.from(client);
 @Injectable()
 export class CreateUser {
   private readonly tableName = 'Users';
+
+  constructor(private readonly mailService: MailService) {}
 
   async execute(dto: CreateUserDto): Promise<Omit<User, 'password'>> {
     const emailCheck = await docClient.send(
@@ -44,7 +47,7 @@ export class CreateUser {
     const user = new User({
       id,
       name: dto.name,
-      email: dto.email,
+      email: dto.email.trim(),
       password: hashedPassword,
       phone: dto.phone,
       profileImageUrl: dto.profileImageUrl || '',
@@ -59,6 +62,21 @@ export class CreateUser {
         Item: user,
       }),
     );
+    const emailHtml = `
+      <h1>Welcome, ${user.name}!</h1>
+      <p>Your registration was successful.</p>
+    `;
+
+    try {
+      await this.mailService.sendMail(
+        user.email,
+        'Registration completed successfully',
+        emailHtml,
+      );
+      console.log('Welcome email sent.');
+    } catch (error) {
+      console.error('Error sending email:', error);
+    }
 
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
