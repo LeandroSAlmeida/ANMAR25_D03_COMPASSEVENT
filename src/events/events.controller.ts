@@ -22,13 +22,15 @@ import { AuthGuard } from '@nestjs/passport';
 import { UserRole } from 'src/users/enums/userRole.enum';
 import { Roles } from '../auth/decoretors/roles.decorator';
 import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
-import { Public } from '../auth/decoretors/public.decorator';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('events')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Roles(UserRole.ORGANIZADOR)
   @Post()
   async create(@Body() dto: CreateEventDto) {
@@ -41,7 +43,8 @@ export class EventController {
       );
     }
   }
-
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -60,7 +63,8 @@ export class EventController {
     }
     return this.eventService.update(id, dto);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   async findById(@Param('id', ParseUUIDPipe) id: string) {
     try {
@@ -72,6 +76,8 @@ export class EventController {
       );
     }
   }
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Roles(UserRole.ORGANIZADOR, UserRole.PARTICIPANTE)
   @Get()
   async getAll(@Query() query: any) {
@@ -84,7 +90,8 @@ export class EventController {
       );
     }
   }
-
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteEvent(

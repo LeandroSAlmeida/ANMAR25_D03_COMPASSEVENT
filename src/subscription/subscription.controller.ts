@@ -21,6 +21,7 @@ import { RolesGuard } from 'src/auth/role.guard';
 import { Roles } from 'src/auth/decoretors/roles.decorator';
 import { UserRole } from 'src/users/enums/userRole.enum';
 import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('subscription')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -29,13 +30,15 @@ export class SubscriptionController {
     private readonly subscriptionService: SubscriptionService,
     private readonly listByUserId: ListSubscriptionsByUser,
   ) {}
-
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Roles(UserRole.ORGANIZADOR, UserRole.PARTICIPANTE)
   @Post()
   async create(@Body() dto: CreateSubscriptionDto): Promise<Subscription> {
     return this.subscriptionService.create(dto);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Get('subscriptions/:id')
   async listByUser(
     @Param('id') id: string,
@@ -72,7 +75,8 @@ export class SubscriptionController {
       );
     }
   }
-
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':userId/:eventId')
   delete(@Param('userId') userId: string, @Param('eventId') eventId: string) {
     return this.subscriptionService.softDeleteSubscription(userId, eventId);

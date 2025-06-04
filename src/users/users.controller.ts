@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Body,
   Controller,
@@ -22,7 +21,10 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Public } from 'src/auth/decoretors/public.decorator';
 import { Roles } from 'src/auth/decoretors/roles.decorator';
 import { UserRole } from './enums/userRole.enum';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
+@ApiTags('users')
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
@@ -41,9 +43,16 @@ export class UsersController {
       );
     }
   }
-
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Roles(UserRole.ORGANIZADOR)
   @Get()
+  @ApiQuery({ name: 'name', required: false })
+  @ApiQuery({ name: 'email', required: false })
+  @ApiQuery({ name: 'role', required: false })
+  @ApiQuery({ name: 'isActive', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'page', required: false })
   async list(
     @Query('name') name?: string,
     @Query('email') email?: string,
@@ -77,7 +86,8 @@ export class UsersController {
       );
     }
   }
-
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -100,7 +110,8 @@ export class UsersController {
       );
     }
   }
-
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   async findById(
     @Param('id') id: string,
@@ -112,7 +123,8 @@ export class UsersController {
 
     throw new HttpException('Access denied', HttpStatus.FORBIDDEN);
   }
-
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   async delete(
     @Param('id') id: string,
